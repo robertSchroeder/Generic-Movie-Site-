@@ -1,0 +1,113 @@
+// DOM objects for the main container, the form containing the search bar, and the search bar; which will be used in the code below.
+const mainContainer = document.querySelector(".content-grid");
+const searchBarForm = document.querySelector(".search-container");
+const searchBar = document.querySelector(".search-bar");
+
+//Accessing API for movie information requested by user via search-bar:
+async function getMovie(url) 
+{
+   const responseObj = await fetch(url);
+   const data = await responseObj.json();
+   return data;
+}
+
+function createElements(data) 
+{  
+   // This is where the API gets all its images. The poster_path property gives us the exact URL image for each movie.
+   // When combined, we can get the precise URL for each respective image.
+   const IMG_PATH = "https://image.tmdb.org/t/p/w1280";
+   const fragment = document.createDocumentFragment(); // Create a fragment to hold new elements
+
+   data.results.forEach(element => 
+   {  
+      //Creating the HTML elements with DOM and populating with relevant values:
+      const movieContainer = document.createElement('div');
+      movieContainer.setAttribute('class', 'movie-container');
+
+      const posterContainer = document.createElement('div');
+      posterContainer.setAttribute('class', 'poster-container');
+
+      const posterImage = document.createElement('img');
+      posterImage.setAttribute('class', 'movie-poster');
+      posterImage.src = IMG_PATH + element.poster_path;
+
+      const movieInfo = document.createElement('div');
+      movieInfo.setAttribute('class', 'movie-info-container');
+      movieInfo.innerHTML = `${element.original_title}`;
+
+      //Creating the structure:
+
+      posterContainer.appendChild(posterImage);
+      movieContainer.appendChild(posterContainer);
+      movieContainer.appendChild(movieInfo);
+
+      fragment.appendChild(movieContainer); // Append elements to the fragment
+
+   });
+
+   mainContainer.innerHTML = ''; // Clear the main container
+   mainContainer.appendChild(fragment); // Append the fragment containing new elements to the main container
+
+}
+
+// Populates main with movie containers generated from trending movie data retrieved by the API:
+
+async function populateMain() 
+{  
+   const urlTrending = 'https://api.themoviedb.org/3/discover/movie?include_adult=false&include_video=false&language=en-US&sort_by=popularity.desc&api_key=cd2088a09a0263d493c9587c229ec168';
+
+   const data = await getMovie(urlTrending);
+   createElements(data);
+}
+
+async function populateSearch(query) 
+{
+   const url = 'https://api.themoviedb.org/3/search/movie?api_key=cd2088a09a0263d493c9587c229ec168&query=' + query;
+   const data = await getMovie(url);
+   createElements(data);
+}
+
+populateMain();
+
+// Need to further analyze
+
+function getQueryParameter() {
+   const urlParams = new URLSearchParams(window.location.search);
+   return urlParams.get('query');
+}
+
+window.addEventListener('DOMContentLoaded', async () => {
+   const query = getQueryParameter();
+   if (query) {
+      await populateSearch(query);
+   } else {
+      populateMain();
+   }
+});
+
+searchBarForm.addEventListener("submit", async (eventObject) => {
+   eventObject.preventDefault();
+   const query = searchBar.value.trim();
+   if (query) {
+      await populateSearch(query);
+      const url = `?query=${encodeURIComponent(query)}`;
+      history.pushState({ page: 'search', query: query }, null, url);
+      searchBar.value = "";
+   }
+});
+
+window.addEventListener('popstate', (event) => 
+{
+   const state = event.state;
+
+   if (!state || !state.page) 
+   {
+      populateMain();
+   } 
+
+   else if (state.page == 'search' && state.query) 
+   {
+      populateSearch(state.query);
+   }
+
+});

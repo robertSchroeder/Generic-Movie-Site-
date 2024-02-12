@@ -1,0 +1,43 @@
+.content-grid
+{
+   display: grid;
+   grid-template-columns: 1fr 1fr 1fr 1fr;
+   column-gap: 20px;
+   row-gap: 20px;
+
+}
+.movie-container
+{  
+   background-color: #151f30;
+   /* border-radius: 20px; */
+   border-radius: 30px;
+   padding: 20px;
+}
+
+.movie-poster
+{
+   width: 100%;
+   border-radius: 30px;
+   
+}
+
+.movie-info-container
+{
+   display: flex;
+   grid-template-columns: 1fr;
+   border-bottom-left-radius: 30px;
+   border-bottom-right-radius: 30px;
+   justify-content: center;
+   align-items: center;
+   color: white;
+   padding-top: 10px;
+   font-family: 'Roboto', Arial;
+   font-size: 18px;
+   font-weight: 700;
+   text-align: center;
+
+}
+
+
+
+
